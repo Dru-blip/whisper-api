@@ -6,7 +6,8 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { RedisProvider } from './modules/utils/redis.service';
 import { UtilsModule } from './modules/utils/utils.module';
-import { User } from './modules/users/users.entity';
+import { User } from './modules/entities/users.entity';
+import { EmailsModule } from './modules/emails/emails.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { User } from './modules/users/users.entity';
     }),
     UtilsModule,
     UsersModule,
+    EmailsModule,
     AuthModule,
   ],
   providers: [RedisProvider],

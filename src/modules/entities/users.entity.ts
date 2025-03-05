@@ -1,10 +1,8 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, Property } from '@mikro-orm/core';
+import { BaseEntity } from './base.entity';
 
 @Entity({ tableName: 'users' })
-export class User {
-  @PrimaryKey({ autoincrement: true })
-  id: number;
-
+export class User extends BaseEntity {
   @Property({ nullable: true })
   name: string;
 
@@ -12,7 +10,7 @@ export class User {
   email: string;
 
   @Property()
-  onboarding: boolean = false;
+  onboarded: boolean = false;
 
   @Property({ nullable: true })
   profilePicture?: string;
