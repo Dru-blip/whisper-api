@@ -6,6 +6,9 @@ import {
   OTP_EXPIRY,
   REDIS_OTP_PREFIX,
 } from 'src/common/constants/redis.constants';
+import { User } from '../entities/users.entity';
+import { TokenService } from '../utils/tokens.service';
+import { EmailService } from '../emails/email.service';
 
 @Injectable()
 export class AuthService {
@@ -13,28 +16,71 @@ export class AuthService {
     @Inject('REDIS')
     private readonly redis: RedisClientType,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
     private readonly em: EntityManager,
+    private readonly tokenService: TokenService,
   ) {}
 
-  async createOtp(email: string): Promise<string> {
-    const otp = this.generateOtp();
-    await this.redis.set(`${REDIS_OTP_PREFIX}${email}`, otp, {
-      EX: OTP_EXPIRY,
-    });
-    return otp;
+  async sendOtp(email: string) {
+    try {
+      const key = `${REDIS_OTP_PREFIX}${email}`;
+      let cachedOtp = await this.redis.get(key);
+
+      if (!cachedOtp) {
+        cachedOtp = this.generateOtp();
+        await this.redis.set(key, cachedOtp, { EX: OTP_EXPIRY });
+      } else {
+        await this.redis.expire(key, OTP_EXPIRY, 'XX');
+      }
+
+      await this.emailService.sendOtpMail(email, cachedOtp);
+      return { message: 'OTP sent successfully' };
+    } catch (error: unknown) {
+      throw new HttpException(
+        'Failed to send OTP',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  async verifyOtp(email: string, otp: string): Promise<boolean> {
+  async verifyOtp(email: string, otp: string) {
     const storedOtp = await this.redis.get(`${REDIS_OTP_PREFIX}${email}`);
-    if (!storedOtp) {
-      throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
+
+    if (storedOtp && storedOtp !== otp) {
+      throw new HttpException('Invalid OTP', HttpStatus.UNAUTHORIZED);
+    }
+    await this.redis.del(`${REDIS_OTP_PREFIX}${email}`);
+    let user = await this.em.findOne(User, { email });
+
+    if (!user) {
+      user = new User(email);
+      await this.em.persistAndFlush(user);
     }
 
-    if (storedOtp && storedOtp === otp) {
-      await this.redis.del(`${REDIS_OTP_PREFIX}${email}`);
-      return true;
+    if (user && user.onboarded) {
+      const accessToken = this.tokenService.generateAccessToken({
+        id: user.id,
+        email: user.email,
+      });
+      const refreshToken = this.tokenService.generateRefreshToken({
+        id: user.id,
+        email: user.email,
+        version: 1,
+      });
+
+      return {
+        message: 'Authenticated successfully',
+        tokens: { accessToken, refreshToken },
+      };
     }
-    return false;
+
+    const onboardingToken = this.tokenService.generateOnboardingToken({
+      email: user.email,
+    });
+    return {
+      verified: true,
+      redirectUrl: `/onboarding?token=${onboardingToken}`,
+    };
   }
 
   generateOtp() {

@@ -14,4 +14,9 @@ export class User extends BaseEntity {
 
   @Property({ nullable: true })
   profilePicture?: string;
+
+  constructor(email: string) {
+    super();
+    this.email = email;
+  }
 }

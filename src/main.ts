@@ -4,6 +4,7 @@ import { JWTAuthGuard } from './common/guards/auth.guard';
 import { TokenService } from './modules/utils/tokens.service';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const adapter = new ExpressAdapter();
@@ -13,6 +14,7 @@ async function bootstrap() {
   const tokensService = app.get(TokenService);
   app.useGlobalGuards(new JWTAuthGuard(reflector, tokensService));
   app.useGlobalInterceptors(new ResponseInterceptor());
+  app.use(cookieParser(process.env.COOKIE_SECRET));
   await app.listen(process.env.PORT ?? 5000);
 }
 

@@ -26,15 +26,15 @@ export class JWTAuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest<Request>();
-    const accessToken: string = request.cookies?.access;
-    const refreshToken: string = request.cookies?.refresh;
+    const { aid: accessToken, rid: refreshToken } = request.signedCookies;
 
     if (!accessToken && !refreshToken) {
       throw new UnauthorizedException('No tokens provided');
     }
 
-    const payload: AccessTokenPayload =
-      this.tokenService.verifyAccessToken(accessToken);
+    const payload: AccessTokenPayload = this.tokenService.verifyAccessToken(
+      accessToken as string,
+    );
 
     if (!payload) {
       throw new UnauthorizedException('Invalid or expired tokens');
