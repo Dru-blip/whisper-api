@@ -1,5 +1,12 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisClientType } from 'redis';
 import {
@@ -9,6 +16,7 @@ import {
 import { User } from '../entities/users.entity';
 import { TokenService } from '../utils/tokens.service';
 import { EmailService } from '../emails/email.service';
+import { Interface } from 'node:readline';
 
 @Injectable()
 export class AuthService {
@@ -36,10 +44,7 @@ export class AuthService {
       await this.emailService.sendOtpMail(email, cachedOtp);
       return { message: 'OTP sent successfully' };
     } catch (error: unknown) {
-      throw new HttpException(
-        'Failed to send OTP',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException('Failed to send OTP');
     }
   }
 
@@ -47,7 +52,8 @@ export class AuthService {
     const storedOtp = await this.redis.get(`${REDIS_OTP_PREFIX}${email}`);
 
     if (storedOtp && storedOtp !== otp) {
-      throw new HttpException('Invalid OTP', HttpStatus.UNAUTHORIZED);
+      // throw new HttpException('Invalid OTP', HttpStatus.UNAUTHORIZED);
+      throw new UnauthorizedException('Invalid OTP');
     }
     await this.redis.del(`${REDIS_OTP_PREFIX}${email}`);
     let user = await this.em.findOne(User, { email });

@@ -13,6 +13,9 @@ export class User extends BaseEntity {
   onboarded: boolean = false;
 
   @Property({ nullable: true })
+  bio: string;
+
+  @Property({ nullable: true })
   profilePicture?: string;
 
   constructor(email: string) {
