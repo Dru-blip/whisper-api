@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import {
-  AccessTokenPayload,
-  OnboardingTokenPayload,
-  RefreshTokenPayload,
-} from '../../types';
 
 @Injectable()
 export class TokenService {
@@ -14,42 +9,29 @@ export class TokenService {
     private readonly jwtService: JwtService,
   ) {}
 
-  generateAccessToken(payload: AccessTokenPayload): string {
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
-      expiresIn: this.configService.get<string>('ACCESS_TOKEN_EXPIRY'),
+  generateToken<T extends Record<string, unknown>>(
+    payload: T,
+    secret: { name?: string; value?: string },
+    expires?: { name?: string; value?: string },
+  ): Promise<string> {
+    return this.jwtService.signAsync(payload, {
+      secret: secret.name
+        ? this.configService.get<string>(secret.name)
+        : secret.value,
+      expiresIn: expires?.name
+        ? this.configService.get<string>(expires.name)
+        : expires?.value,
     });
   }
 
-  generateRefreshToken(payload: RefreshTokenPayload): string {
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-      expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRY'),
-    });
-  }
-
-  generateOnboardingToken(payload: OnboardingTokenPayload): string {
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('ONBOARDING_TOKEN_SECRET'),
-      expiresIn: this.configService.get<string>('ONBOARDING_TOKEN_EXPIRY'),
-    });
-  }
-
-  verifyAccessToken(token: string): AccessTokenPayload {
-    return this.jwtService.verify(token, {
-      secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
-    });
-  }
-
-  verifyRefreshToken(token: string): RefreshTokenPayload {
-    return this.jwtService.verify(token, {
-      secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-    });
-  }
-
-  verifyOnboardingToken(token: string): OnboardingTokenPayload {
-    return this.jwtService.verify(token, {
-      secret: this.configService.get<string>('ONBOARDING_TOKEN_SECRET'),
+  async verifyToken<T>(
+    token: string,
+    secret: { name?: string; value?: string },
+  ): Promise<T> {
+    return <T>await this.jwtService.verifyAsync(token, {
+      secret: secret.name
+        ? this.configService.get<string>(secret.name)
+        : secret.value,
     });
   }
 }

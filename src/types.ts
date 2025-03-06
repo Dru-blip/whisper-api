@@ -12,3 +12,9 @@ export type RefreshTokenPayload = {
 export type OnboardingTokenPayload = {
   email: string;
 };
+
+export type VerificationTokenPayload = {
+  email: string;
+  cid: string;
+  ip: string;
+};

@@ -9,6 +9,7 @@ import { TokenService } from '../../modules/utils/tokens.service';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AccessTokenPayload } from 'src/types';
+import { ACCESS_TOKEN_SECRET } from '../constants/config-names.constants';
 
 @Injectable()
 export class JWTAuthGuard implements CanActivate {
@@ -17,7 +18,7 @@ export class JWTAuthGuard implements CanActivate {
     private readonly tokenService: TokenService,
   ) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -32,8 +33,9 @@ export class JWTAuthGuard implements CanActivate {
       throw new UnauthorizedException('No tokens provided');
     }
 
-    const payload: AccessTokenPayload = this.tokenService.verifyAccessToken(
+    const payload = await this.tokenService.verifyToken<AccessTokenPayload>(
       accessToken as string,
+      { name: ACCESS_TOKEN_SECRET },
     );
 
     if (!payload) {

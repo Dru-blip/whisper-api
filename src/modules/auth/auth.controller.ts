@@ -4,12 +4,14 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Query,
+  Req,
   Res,
 } from '@nestjs/common';
 import { LoginInput } from './dto/login.input';
 import { AuthService } from './auth.service';
 import { OTPInput } from './dto/otp.input';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('auth')
@@ -18,22 +20,27 @@ export class AuthController {
 
   @Post('login')
   @Public()
-  async sendOtp(@Body() loginInput: LoginInput) {
-    return await this.authService.sendOtp(loginInput.email);
+  async sendOtp(@Body() loginInput: LoginInput, @Req() req: Request) {
+    return await this.authService.sendOtp(
+      loginInput,
+      req.socket.remoteAddress!,
+    );
   }
 
   @Post('verify')
   @Public()
   async verifyOtp(
+    @Query('tid') token: string,
     @Body() verifyInput: OTPInput,
     @Res({ passthrough: true }) response: Response,
   ) {
     try {
       const data = await this.authService.verifyOtp(
+        token,
         verifyInput.email,
         verifyInput.otp,
       );
-      if (data.tokens) {
+      if (data?.tokens) {
         response.cookie('aid', data.tokens.accessToken, {
           httpOnly: true,
           secure: true,
@@ -47,6 +54,10 @@ export class AuthController {
           signed: true,
         });
       }
+      if (data?.onboarding) {
+        return { ...data };
+      }
+      return { message: data?.message };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

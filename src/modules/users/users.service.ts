@@ -8,6 +8,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../entities/users.entity';
 import { TokenService } from '../utils/tokens.service';
 import { UserOnboardingDto } from './dto/onboarding.dto';
+import { OnboardingTokenPayload } from 'src/types';
+import { ONBOARDING_TOKEN_SECRET } from 'src/common/constants/config-names.constants';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +21,11 @@ export class UsersService {
   async onboardUser(onboardingToken: string, userInfo: UserOnboardingDto) {
     let email: string;
     try {
-      const payload = this.tokenService.verifyOnboardingToken(onboardingToken);
+      const payload =
+        await this.tokenService.verifyToken<OnboardingTokenPayload>(
+          onboardingToken,
+          { name: ONBOARDING_TOKEN_SECRET },
+        );
       email = payload.email;
     } catch (error) {
       throw new UnauthorizedException('Invalid onboarding token');
