@@ -1,10 +1,10 @@
 export type AccessTokenPayload = {
-  id: number;
+  id: string;
   email: string;
 };
 
 export type RefreshTokenPayload = {
-  id: number;
+  id: string;
   email: string;
   version: number;
 };
@@ -16,5 +16,4 @@ export type OnboardingTokenPayload = {
 export type VerificationTokenPayload = {
   email: string;
   cid: string;
-  ip: string;
 };

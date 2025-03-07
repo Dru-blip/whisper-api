@@ -1,7 +1,6 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
-  HttpException,
-  HttpStatus,
+  ForbiddenException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -30,6 +29,7 @@ import {
   REFRESH_TOKEN_SECRET,
 } from 'src/common/constants/config-names.constants';
 import { LoginInput } from './dto/login.input';
+import { OTPInput } from './dto/otp.input';
 
 @Injectable()
 export class AuthService {
@@ -46,17 +46,21 @@ export class AuthService {
     try {
       const key = `${REDIS_OTP_PREFIX}${loginInput.email}`;
       let cachedOtp = await this.redis.get(key);
+      let otpData: { otp: string; ip: string };
 
       if (!cachedOtp) {
-        cachedOtp = this.generateOtp();
-        await this.redis.set(key, cachedOtp, { EX: OTP_EXPIRY });
+        otpData = { otp: this.generateOtp(), ip };
+        await this.redis.set(key, JSON.stringify(otpData), {
+          EX: OTP_EXPIRY,
+        });
       } else {
+        otpData = <typeof otpData>JSON.parse(cachedOtp);
         await this.redis.expire(key, OTP_EXPIRY, 'XX');
       }
-      await this.emailService.sendOtpMail(loginInput.email, cachedOtp);
+      await this.emailService.sendOtpMail(loginInput.email, otpData.otp);
       const verificationToken =
         await this.tokenService.generateToken<VerificationTokenPayload>(
-          { email: loginInput.email, cid: loginInput.cid, ip },
+          { email: loginInput.email, cid: loginInput.cid },
           { value: 'verification' },
           { value: '15m' },
         );
@@ -69,7 +73,7 @@ export class AuthService {
     }
   }
 
-  async verifyOtp(verificationToken: string, email: string, otp: string) {
+  async verifyOtp(verificationToken: string, input: OTPInput, ip: string) {
     let verificationPayload: VerificationTokenPayload;
 
     try {
@@ -82,20 +86,26 @@ export class AuthService {
       throw new UnauthorizedException('Invalid verification token');
     }
 
-    const storedOtp = await this.redis.get(`${REDIS_OTP_PREFIX}${email}`);
+    const storedOtp = await this.redis.get(`${REDIS_OTP_PREFIX}${input.email}`);
 
     if (!storedOtp) {
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    if (storedOtp && storedOtp !== otp) {
+    const cachedData = <{ otp: string; ip: string }>JSON.parse(storedOtp);
+
+    if (cachedData.ip !== ip) {
+      throw new ForbiddenException('unauthorized access');
+    }
+
+    if (cachedData.otp !== input.otp) {
       throw new UnauthorizedException('Invalid OTP');
     }
-    await this.redis.del(`${REDIS_OTP_PREFIX}${email}`);
-    let user = await this.em.findOne(User, { email });
+    await this.redis.del(`${REDIS_OTP_PREFIX}${input.email}`);
+    let user = await this.em.findOne(User, { email: input.email });
 
     if (!user) {
-      user = new User(email);
+      user = new User(input.email);
       user.onboarded = false;
       await this.em.persistAndFlush(user);
     }

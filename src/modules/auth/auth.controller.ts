@@ -33,12 +33,13 @@ export class AuthController {
     @Query('tid') token: string,
     @Body() verifyInput: OTPInput,
     @Res({ passthrough: true }) response: Response,
+    @Req() req: Request,
   ) {
     try {
       const data = await this.authService.verifyOtp(
         token,
-        verifyInput.email,
-        verifyInput.otp,
+        verifyInput,
+        req.socket.remoteAddress!,
       );
       if (data?.tokens) {
         response.cookie('aid', data.tokens.accessToken, {

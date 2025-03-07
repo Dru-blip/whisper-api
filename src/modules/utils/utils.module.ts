@@ -1,11 +1,11 @@
 import { Global, Module } from '@nestjs/common';
-import { RedisProvider } from './redis.service';
+import { RedisClient } from './redis.client';
 import { TokenService } from './tokens.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Global()
 @Module({
-  providers: [RedisProvider, TokenService, JwtService],
-  exports: [RedisProvider, TokenService],
+  providers: [RedisClient, TokenService, JwtService],
+  exports: [RedisClient, TokenService],
 })
 export class UtilsModule {}

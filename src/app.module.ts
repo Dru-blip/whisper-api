@@ -4,7 +4,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { RedisProvider } from './modules/utils/redis.service';
 import { UtilsModule } from './modules/utils/utils.module';
 import { User } from './modules/entities/users.entity';
 import { EmailsModule } from './modules/emails/emails.module';
@@ -32,6 +31,5 @@ import { EmailsModule } from './modules/emails/emails.module';
     EmailsModule,
     AuthModule,
   ],
-  providers: [RedisProvider],
 })
 export class AppModule {}

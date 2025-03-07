@@ -28,7 +28,7 @@ export class UsersService {
         );
       email = payload.email;
     } catch (error) {
-      throw new UnauthorizedException('Invalid onboarding token');
+      throw new UnauthorizedException('Session expired');
     }
 
     const user = await this.em.findOne(User, { email });
