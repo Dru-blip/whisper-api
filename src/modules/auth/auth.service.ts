@@ -22,6 +22,7 @@ import {
   VerificationTokenPayload,
 } from 'src/types';
 import {
+  ACCESS_TOKEN_EXPIRY,
   ACCESS_TOKEN_SECRET,
   ONBOARDING_TOKEN_EXPIRY,
   ONBOARDING_TOKEN_SECRET,
@@ -62,7 +63,7 @@ export class AuthService {
         await this.tokenService.generateToken<VerificationTokenPayload>(
           { email: loginInput.email, cid: loginInput.cid },
           { value: 'verification' },
-          { value: '15m' },
+          { name: ACCESS_TOKEN_EXPIRY },
         );
       return {
         message: 'OTP sent successfully',
@@ -144,7 +145,7 @@ export class AuthService {
           email: user.email,
         },
         { name: ACCESS_TOKEN_SECRET },
-        { name: ACCESS_TOKEN_SECRET },
+        { name: ACCESS_TOKEN_EXPIRY },
       );
     const refreshToken =
       await this.tokenService.generateToken<RefreshTokenPayload>(

@@ -45,14 +45,16 @@ export class AuthController {
         response.cookie('aid', data.tokens.accessToken, {
           httpOnly: true,
           secure: true,
-          sameSite: 'strict',
+          sameSite: 'lax',
           signed: true,
+          maxAge: 1000 * 60 * 15,
         });
         response.cookie('rid', data.tokens.refreshToken, {
           httpOnly: true,
           secure: true,
-          sameSite: 'strict',
+          sameSite: 'lax',
           signed: true,
+          maxAge: 1000 * 60 * 60 * 24,
         });
       }
       if (data?.onboarding) {
@@ -60,6 +62,7 @@ export class AuthController {
       }
       return { message: data?.message };
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
