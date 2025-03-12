@@ -19,6 +19,7 @@ import {
   AccessTokenPayload,
   OnboardingTokenPayload,
   RefreshTokenPayload,
+  Session,
   VerificationTokenPayload,
 } from 'src/types';
 import {
@@ -31,6 +32,7 @@ import {
 } from 'src/common/constants/config-names.constants';
 import { LoginInput } from './dto/login.input';
 import { OTPInput } from './dto/otp.input';
+import { SessionService } from '../utils/session.service';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +43,12 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly em: EntityManager,
     private readonly tokenService: TokenService,
+    private readonly sessionService: SessionService,
   ) {}
+
+  async logout(session: Session) {
+    await this.sessionService.invalidateSession(session.id, session.userId);
+  }
 
   async sendOtp(loginInput: LoginInput, ip: string) {
     try {
@@ -111,6 +118,13 @@ export class AuthService {
       await this.em.persistAndFlush(user);
     }
 
+    const token = this.sessionService.generateSessionToken();
+    const session = await this.sessionService.createSession(
+      token,
+      user.id,
+      user.email,
+    );
+
     if (!user.onboarded) {
       const onboardingToken =
         await this.tokenService.generateToken<OnboardingTokenPayload>(
@@ -123,16 +137,17 @@ export class AuthService {
       return {
         onboarding: true,
         verified: true,
+        sessionToken: token,
+        session,
         redirectUrl: `/onboarding?token=${onboardingToken}`,
       };
     }
 
     if (user && user.onboarded) {
-      const { accessToken, refreshToken } = await this.generateAuthTokens(user);
-
       return {
         message: 'Authenticated successfully',
-        tokens: { accessToken, refreshToken },
+        sessionToken: token,
+        session,
       };
     }
   }

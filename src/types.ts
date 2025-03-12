@@ -17,3 +17,10 @@ export type VerificationTokenPayload = {
   email: string;
   cid: string;
 };
+
+export type Session = {
+  id: string;
+  userId: string;
+  email: string;
+  expiresAt: Date;
+};

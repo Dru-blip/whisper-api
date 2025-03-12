@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
   Post,
@@ -13,10 +14,16 @@ import { AuthService } from './auth.service';
 import { OTPInput } from './dto/otp.input';
 import { Request, Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
+import { Session } from 'src/types';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('logout')
+  async logout(@Req() req: Request) {
+    await this.authService.logout(<Session>req.session);
+  }
 
   @Post('login')
   @Public()
@@ -41,20 +48,12 @@ export class AuthController {
         verifyInput,
         req.socket.remoteAddress!,
       );
-      if (data?.tokens) {
-        response.cookie('aid', data.tokens.accessToken, {
+      if (data?.session) {
+        response.cookie('sid', data.sessionToken, {
           httpOnly: true,
           secure: true,
           sameSite: 'lax',
           signed: true,
-          maxAge: 1000 * 60 * 15,
-        });
-        response.cookie('rid', data.tokens.refreshToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'lax',
-          signed: true,
-          maxAge: 1000 * 60 * 60 * 24,
         });
       }
       if (data?.onboarding) {
@@ -62,7 +61,6 @@ export class AuthController {
       }
       return { message: data?.message };
     } catch (error) {
-      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
