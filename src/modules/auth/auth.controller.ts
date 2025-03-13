@@ -15,16 +15,19 @@ import { OTPInput } from './dto/otp.input';
 import { Request, Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Session } from 'src/types';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Logout' })
   @Get('logout')
   async logout(@Req() req: Request) {
     await this.authService.logout(<Session>req.session);
   }
 
+  @ApiOperation({ summary: 'Login' })
   @Post('login')
   @Public()
   async sendOtp(@Body() loginInput: LoginInput, @Req() req: Request) {
@@ -34,6 +37,7 @@ export class AuthController {
     );
   }
 
+  @ApiOperation({ summary: 'Verify OTP' })
   @Post('verify')
   @Public()
   async verifyOtp(

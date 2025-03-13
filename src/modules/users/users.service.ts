@@ -8,7 +8,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../entities/users.entity';
 import { TokenService } from '../utils/tokens.service';
 import { UserOnboardingDto } from './dto/onboarding.dto';
-import { OnboardingTokenPayload } from 'src/types';
+import { OnboardingTokenPayload, Session } from 'src/types';
 import { ONBOARDING_TOKEN_SECRET } from 'src/common/constants/config-names.constants';
 
 @Injectable()
@@ -17,6 +17,14 @@ export class UsersService {
     private readonly em: EntityManager,
     private readonly tokenService: TokenService,
   ) {}
+
+  async fetchSelf(session: Session) {
+    const user = await this.em.findOne(User, { id: session.userId });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
+  }
 
   async onboardUser(onboardingToken: string, userInfo: UserOnboardingDto) {
     let email: string;
