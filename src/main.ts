@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { JWTAuthGuard } from './common/guards/auth.guard';
+import { AuthGuard } from './common/guards/auth.guard';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import * as cookieParser from 'cookie-parser';
@@ -18,7 +18,7 @@ async function bootstrap() {
 
   app.enableCors({ origin: process.env.CLIENT_URL });
 
-  app.useGlobalGuards(new JWTAuthGuard(reflector, sessionService));
+  app.useGlobalGuards(new AuthGuard(reflector, sessionService));
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.use(cookieParser(process.env.COOKIE_SECRET));
 

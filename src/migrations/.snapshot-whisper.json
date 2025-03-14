@@ -75,6 +75,15 @@
           "length": 255,
           "mappedType": "string"
         },
+        "discriminator": {
+          "name": "discriminator",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
         "profile_picture": {
           "name": "profile_picture",
           "type": "varchar(255)",

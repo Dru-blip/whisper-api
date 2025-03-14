@@ -21,8 +21,6 @@ import { EmailsModule } from './modules/emails/emails.module';
         password: config.get<string>('DB_PASSWORD'),
         driver: PostgreSqlDriver,
         entities: [User],
-        // entities: ['./dist/modules/**/*.entity.js'],
-        // entitiesTs: ['./modules/**/*.entity.ts'],
         host: 'localhost',
       }),
     }),

@@ -56,7 +56,7 @@ This repository provides a  API for Whisper clients, built using NestJS, MikroOR
 -   [ ] Implement robust error handling for Socket.IO events.
 -   [ ] Implement rate limiting for Socket.IO events.
 -   [ ] Consider using Redis Pub/Sub for scaling Socket.IO.
-        
+
 
 ## Prerequisites
 -   Node.js
@@ -93,7 +93,7 @@ This repository provides a  API for Whisper clients, built using NestJS, MikroOR
     DB_USER=<database_user>
     DB_PORT=5432
     ```
-    
+
     ```
     EMAIL_USER=<gmail>
     EMAIL_PASS=<app-password>

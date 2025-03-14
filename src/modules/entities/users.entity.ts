@@ -16,6 +16,9 @@ export class User extends BaseEntity {
   bio: string;
 
   @Property({ nullable: true })
+  discriminator: number;
+
+  @Property({ nullable: true })
   profilePicture?: string;
 
   constructor(email: string) {

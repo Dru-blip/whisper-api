@@ -8,7 +8,7 @@ import { Session } from 'src/types';
 import { Inject } from '@nestjs/common';
 import {
   REDIS_SESSION_PREFIX,
-  REDIS_USER_SESSIONS_PREFIX,
+  // REDIS_USER_SESSIONS_PREFIX,
 } from 'src/common/constants/redis.constants';
 
 export class SessionService {
@@ -39,9 +39,9 @@ export class SessionService {
       `${REDIS_SESSION_PREFIX}${session.id}`,
       JSON.stringify({
         id: session.id,
-        user_id: session.userId,
+        userId: session.userId,
         email: session.email,
-        expires_at: Math.floor(session.expiresAt.getTime() / 1000),
+        expiresAt: Math.floor(session.expiresAt.getTime() / 1000),
       }),
       {
         EXAT: Math.floor(session.expiresAt.getTime() / 1000),

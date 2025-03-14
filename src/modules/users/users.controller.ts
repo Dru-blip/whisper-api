@@ -18,7 +18,7 @@ export class UsersController {
   @Get('@me')
   async fetchSelf(@Req() req: Request) {
     const { session } = req;
-    await this.userService.fetchSelf(<Session>session);
+    return await this.userService.fetchSelf(<Session>session);
   }
 
   @ApiOperation({ summary: 'Complete Onboarding' })
@@ -28,6 +28,6 @@ export class UsersController {
     @Query('token') token: string,
     @Body() info: UserOnboardingDto,
   ) {
-    await this.userService.onboardUser(token, info);
+    return await this.userService.onboardUser(token, info);
   }
 }

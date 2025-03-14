@@ -5,18 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-// import { TokenService } from '../../modules/utils/tokens.service';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-// import { AccessTokenPayload } from 'src/types';
-// import { ACCESS_TOKEN_SECRET } from '../constants/config-names.constants';
 import { SessionService } from 'src/modules/utils/session.service';
 
 @Injectable()
-export class JWTAuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    // private readonly tokenService: TokenService,
     private readonly sessionService: SessionService,
   ) {}
 

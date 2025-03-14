@@ -57,6 +57,7 @@ export class AuthController {
           httpOnly: true,
           secure: true,
           sameSite: 'lax',
+          maxAge: data.session.expiresAt.getTime(),
           signed: true,
         });
       }

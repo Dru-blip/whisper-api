@@ -10,6 +10,8 @@ import { TokenService } from '../utils/tokens.service';
 import { UserOnboardingDto } from './dto/onboarding.dto';
 import { OnboardingTokenPayload, Session } from 'src/types';
 import { ONBOARDING_TOKEN_SECRET } from 'src/common/constants/config-names.constants';
+import { sha256 } from '@oslojs/crypto/sha2';
+import { encodeHexLowerCase } from '@oslojs/encoding';
 
 @Injectable()
 export class UsersService {
@@ -54,11 +56,19 @@ export class UsersService {
         user.onboarded = true;
         user.name = userInfo.name;
         user.bio = userInfo.bio;
+        user.discriminator = this.generateDiscriminator(user.id);
         await this.em.persistAndFlush(user);
         return { message: 'User onboarded successfully', user };
       }
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException('Failed to onboard user');
     }
+  }
+
+  generateDiscriminator(userId: string): number {
+    const hash = encodeHexLowerCase(sha256(new TextEncoder().encode(userId)));
+    const discriminator = hash.substring(hash.length - 5);
+    return parseInt(discriminator, 16) % 10000;
   }
 }
