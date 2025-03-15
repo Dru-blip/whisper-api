@@ -21,6 +21,12 @@ export class UsersController {
     return await this.userService.fetchSelf(<Session>session);
   }
 
+  @Get('/')
+  async searchUsers(@Query('query') query: string) {
+    const users = await this.userService.searchUsers(query);
+    return { users };
+  }
+
   @ApiOperation({ summary: 'Complete Onboarding' })
   @Post('onboarding')
   @Public()

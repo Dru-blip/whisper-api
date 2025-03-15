@@ -28,6 +28,11 @@ export class UsersService {
     return user;
   }
 
+  async searchUsers(query: string) {
+    const users = await this.em.find(User, { name: query });
+    return users;
+  }
+
   async onboardUser(onboardingToken: string, userInfo: UserOnboardingDto) {
     let email: string;
     try {
