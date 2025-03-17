@@ -25,13 +25,16 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest<Request>();
-    const { sid } = request.signedCookies;
-
-    if (!sid) {
+    const [name, value] = request.headers.cookie!.split('=');
+    if (name !== 'sid') {
       throw new UnauthorizedException('No tokens provided');
     }
 
-    const session = await this.sessionService.validateSessionToken(<string>sid);
+    if (!value) {
+      throw new UnauthorizedException('No tokens provided');
+    }
+
+    const session = await this.sessionService.validateSessionToken(value);
 
     if (!session) {
       throw new UnauthorizedException('Invalid token');

@@ -58,7 +58,6 @@ export class AuthController {
           secure: true,
           sameSite: 'lax',
           maxAge: data.session.expiresAt.getTime(),
-          signed: true,
         });
       }
       if (data?.onboarding) {

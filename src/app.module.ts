@@ -7,6 +7,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { UtilsModule } from './modules/utils/utils.module';
 import { User } from './modules/entities/users.entity';
 import { EmailsModule } from './modules/emails/emails.module';
+import { WsModule } from './modules/ws/ws.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EmailsModule } from './modules/emails/emails.module';
     UsersModule,
     EmailsModule,
     AuthModule,
+    WsModule,
   ],
 })
 export class AppModule {}

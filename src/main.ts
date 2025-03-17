@@ -20,7 +20,7 @@ async function bootstrap() {
 
   app.useGlobalGuards(new AuthGuard(reflector, sessionService));
   app.useGlobalInterceptors(new ResponseInterceptor());
-  app.use(cookieParser(process.env.COOKIE_SECRET));
+  // app.use(cookieParser(process.env.COOKIE_SECRET));
 
   // API Documentation using swagger and scalar
   const config = new DocumentBuilder()
