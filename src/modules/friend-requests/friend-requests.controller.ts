@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { FriendRequestsService } from './friend-requests.service';
 import { CreateFriendRequestDto } from './dto/create-fr.dto';
 import { FriendRequest } from '../entities/friend-request.entity';
@@ -17,5 +25,15 @@ export class FriendRequestsController {
       <string>req.session?.userId,
       data,
     );
+  }
+
+  @Patch('/:id/accept')
+  async acceptFriendRequest(@Param('id') id: string) {
+    return await this.friendRequestsService.acceptFriendRequest(id);
+  }
+
+  @Delete('/:id/reject')
+  async rejectFriendRequest(@Param('id') id: string) {
+    return await this.friendRequestsService.rejectFriendRequest(id);
   }
 }

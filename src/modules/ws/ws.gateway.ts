@@ -4,12 +4,14 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { AuthMiddleware } from './ws.middleware';
 import { SessionService } from '../utils/session.service';
 import { ConfigService } from '@nestjs/config';
 import { CookieService } from '../utils/cookie.service';
+import { FriendRequest } from '../entities/friend-request.entity';
 
 @WebSocketGateway({
   cors: {
@@ -26,6 +28,9 @@ export class WsGateway implements OnGatewayInit<Server>, OnGatewayConnection {
     private readonly cookieService: CookieService,
   ) {}
 
+  @WebSocketServer()
+  server: Server;
+
   afterInit(server: Server) {
     const middleware = AuthMiddleware(
       this.configService,
@@ -35,12 +40,18 @@ export class WsGateway implements OnGatewayInit<Server>, OnGatewayConnection {
     server.use(middleware);
   }
 
-  handleConnection(client: WsSocket, ...args: any[]) {
-    // console.log(client.request.headers);
+  async handleConnection(client: WsSocket) {
+    await client.join(`user:${client.data.session.userId}`);
   }
 
   @SubscribeMessage('message')
   handleMessage(client: any, payload: any): string {
     return 'Hello world!';
+  }
+
+  async sendFriendRequest(receiverId: string, friendRequest: FriendRequest) {
+    this.server
+      .to(`user:${receiverId}`)
+      .emit('friendRequest:receive', { friendRequest });
   }
 }
