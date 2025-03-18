@@ -1,25 +1,30 @@
-import { NextFunction, Request, Response } from 'express';
+// import { NextFunction, Request, Response } from 'express';
+import { CookieService } from '../utils/cookie.service';
 import { SessionService } from '../utils/session.service';
 // import { UnauthorizedException } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
-import * as signature from 'cookie-signature';
+// import { WsException } from '@nestjs/websockets';
+// import { DefaultEventsMap, Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
-import { CipherKey } from 'node:crypto';
+// import { Session } from 'src/types';
 
 type SocketMiddleware = (
-  socket: Socket,
+  socket: WsSocket,
   next: (error?: Error) => void,
 ) => Promise<void>;
 
 export const AuthMiddleware = (
   configService: ConfigService,
   sessionService: SessionService,
+  cookieService: CookieService,
 ): SocketMiddleware => {
   return async (socket, next) => {
     try {
-      const [name, value] = socket.handshake.headers.cookie!.split('=');
-      if (name !== 'sid') {
+      const value = cookieService.getCookie(
+        <string>socket.handshake.headers.cookie,
+        'sid',
+      );
+
+      if (!value) {
         next(new Error('Invalid token'));
         return;
       }

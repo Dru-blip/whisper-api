@@ -3,10 +3,10 @@ import { AppModule } from './app.module';
 import { AuthGuard } from './common/guards/auth.guard';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import * as cookieParser from 'cookie-parser';
 import { SessionService } from './modules/utils/session.service';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
+import { CookieService } from './modules/utils/cookie.service';
 
 async function bootstrap() {
   const adapter = new ExpressAdapter();
@@ -15,10 +15,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
   const sessionService = app.get(SessionService);
+  const cookieService = app.get(CookieService);
 
-  app.enableCors({ origin: process.env.CLIENT_URL });
+  app.enableCors({ origin: process.env.CLIENT_URL, credentials: true });
 
-  app.useGlobalGuards(new AuthGuard(reflector, sessionService));
+  app.useGlobalGuards(new AuthGuard(reflector, sessionService, cookieService));
   app.useGlobalInterceptors(new ResponseInterceptor());
   // app.use(cookieParser(process.env.COOKIE_SECRET));
 

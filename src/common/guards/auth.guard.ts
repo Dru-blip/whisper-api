@@ -8,12 +8,14 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { SessionService } from 'src/modules/utils/session.service';
+import { CookieService } from 'src/modules/utils/cookie.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private readonly sessionService: SessionService,
+    private readonly cookieService: CookieService,
   ) {}
 
   async canActivate(context: ExecutionContext) {
@@ -25,10 +27,11 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest<Request>();
-    const [name, value] = request.headers.cookie!.split('=');
-    if (name !== 'sid') {
-      throw new UnauthorizedException('No tokens provided');
-    }
+
+    const value = this.cookieService.getCookie(
+      <string>request.headers.cookie,
+      'sid',
+    );
 
     if (!value) {
       throw new UnauthorizedException('No tokens provided');

@@ -8,6 +8,8 @@ import { UtilsModule } from './modules/utils/utils.module';
 import { User } from './modules/entities/users.entity';
 import { EmailsModule } from './modules/emails/emails.module';
 import { WsModule } from './modules/ws/ws.module';
+import { FriendRequest } from './modules/entities/friend-request.entity';
+import { FriendRequestsModule } from './modules/friend-requests/friend-requests.module';
 
 @Module({
   imports: [
@@ -21,7 +23,7 @@ import { WsModule } from './modules/ws/ws.module';
         port: config.get<number>('DB_PORT'),
         password: config.get<string>('DB_PASSWORD'),
         driver: PostgreSqlDriver,
-        entities: [User],
+        entities: [User, FriendRequest],
         host: 'localhost',
       }),
     }),
@@ -29,6 +31,7 @@ import { WsModule } from './modules/ws/ws.module';
     UsersModule,
     EmailsModule,
     AuthModule,
+    FriendRequestsModule,
     WsModule,
   ],
 })

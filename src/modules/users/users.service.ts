@@ -21,7 +21,11 @@ export class UsersService {
   ) {}
 
   async fetchSelf(session: Session) {
-    const user = await this.em.findOne(User, { id: session.userId });
+    const user = await this.em.findOne(
+      User,
+      { id: session.userId },
+      { populate: ['incomingFriendRequests', 'outgoingFriendRequests'] },
+    );
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

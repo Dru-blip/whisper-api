@@ -5,11 +5,11 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { AuthMiddleware } from './ws.middleware';
 import { SessionService } from '../utils/session.service';
-import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
+import { CookieService } from '../utils/cookie.service';
 
 @WebSocketGateway({
   cors: {
@@ -23,16 +23,19 @@ export class WsGateway implements OnGatewayInit<Server>, OnGatewayConnection {
   constructor(
     private readonly sessionService: SessionService,
     private readonly configService: ConfigService,
+    private readonly cookieService: CookieService,
   ) {}
 
   afterInit(server: Server) {
-    server.engine.use(
-      cookieParser(this.configService.get<string>('COOKIE_SECRET')),
+    const middleware = AuthMiddleware(
+      this.configService,
+      this.sessionService,
+      this.cookieService,
     );
-    server.use(AuthMiddleware(this.configService, this.sessionService));
+    server.use(middleware);
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: WsSocket, ...args: any[]) {
     // console.log(client.request.headers);
   }
 
