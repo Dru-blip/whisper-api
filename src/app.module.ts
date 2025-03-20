@@ -10,6 +10,7 @@ import { EmailsModule } from './modules/emails/emails.module';
 import { WsModule } from './modules/ws/ws.module';
 import { FriendRequest } from './modules/entities/friend-request.entity';
 import { FriendRequestsModule } from './modules/friend-requests/friend-requests.module';
+import { FriendsModule } from './modules/friends/friends.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { FriendRequestsModule } from './modules/friend-requests/friend-requests.
     EmailsModule,
     AuthModule,
     FriendRequestsModule,
+    FriendsModule,
     WsModule,
   ],
 })
