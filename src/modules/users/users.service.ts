@@ -24,7 +24,14 @@ export class UsersService {
     const user = await this.em.findOne(
       User,
       { id: session.userId },
-      { populate: ['incomingFriendRequests', 'outgoingFriendRequests'] },
+      {
+        populate: [
+          'incomingFriendRequests.sender',
+          'outgoingFriendRequests.receiver',
+          'initiatedFriendships.receiver',
+          'receivedFriendships.initiator',
+        ],
+      },
     );
     if (!user) {
       throw new UnauthorizedException('User not found');

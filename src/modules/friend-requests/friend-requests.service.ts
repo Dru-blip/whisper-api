@@ -4,6 +4,7 @@ import { CreateFriendRequestDto } from './dto/create-fr.dto';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { WsGateway } from '../ws/ws.gateway';
 import { Friend } from '../entities/friend.entity';
+import { User } from '../entities/users.entity';
 
 @Injectable()
 export class FriendRequestsService {
@@ -25,8 +26,12 @@ export class FriendRequestsService {
     if (existingRequest) {
       return existingRequest;
     }
+    const sender = await this.em.findOne(User, userId);
+    if (!sender) {
+      throw new NotFoundException('Sender not found');
+    }
     const friendRequest = this.em.create(FriendRequest, {
-      sender: userId,
+      sender,
       receiver: details.receiverId,
     });
     await this.em.flush();
