@@ -11,6 +11,7 @@ import { WsModule } from './modules/ws/ws.module';
 import { FriendRequest } from './modules/entities/friend-request.entity';
 import { FriendRequestsModule } from './modules/friend-requests/friend-requests.module';
 import { FriendsModule } from './modules/friends/friends.module';
+import { UserNotification } from './modules/entities/notification.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { FriendsModule } from './modules/friends/friends.module';
         port: config.get<number>('DB_PORT'),
         password: config.get<string>('DB_PASSWORD'),
         driver: PostgreSqlDriver,
-        entities: [User, FriendRequest],
+        entities: [User, FriendRequest, UserNotification],
         host: 'localhost',
       }),
     }),

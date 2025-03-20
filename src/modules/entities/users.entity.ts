@@ -2,6 +2,7 @@ import { Collection, Entity, OneToMany, Property } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
 import { FriendRequest } from './friend-request.entity';
 import { Friend } from './friend.entity';
+import { UserNotification } from './notification.entity';
 
 @Entity({ tableName: 'users' })
 export class User extends BaseEntity {
@@ -34,6 +35,9 @@ export class User extends BaseEntity {
 
   @OneToMany({ entity: () => Friend, mappedBy: 'receiver' })
   receivedFriendships = new Collection<Friend>(this);
+
+  @OneToMany({ entity: () => UserNotification, mappedBy: 'user' })
+  notifications = new Collection<UserNotification>(this);
 
   constructor(email: string) {
     super();

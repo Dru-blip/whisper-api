@@ -36,6 +36,9 @@ export const AuthMiddleware = (
         return;
       }
 
+      const req = socket.request as any;
+      req.user = session;
+
       socket.data.session = session;
       next();
     } catch (error) {
