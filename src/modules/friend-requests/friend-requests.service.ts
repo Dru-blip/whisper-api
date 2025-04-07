@@ -53,6 +53,12 @@ export class FriendRequestsService {
         );
       }
     }
+    const receiver = await this.em.findOne(User, details.receiverId);
+    friendRequest.receiver = receiver!;
+
+    //@ts-ignore
+    friendRequest.sender = null as any;
+
     return friendRequest;
   }
 
